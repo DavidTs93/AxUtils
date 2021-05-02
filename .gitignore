@@ -1,0 +1,11 @@
+/bin/
+/target/
+.classpath
+.project
+*.prefs
+*.html
+*.zip
+*.png
+*.js
+*.css
+doc/element-list

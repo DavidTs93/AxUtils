@@ -1,0 +1,7 @@
+name: AxUtils
+main: me.Aldreda.AxUtils.AxUtils
+softdepend: [Vault,WorldGuard,PlaceholderAPI,Citizens,AxEconomy]
+version: 1.0
+description: Utilities for Aldreda (Started by DMan16)
+author: AldredaDevTeam
+api-version: 1.16

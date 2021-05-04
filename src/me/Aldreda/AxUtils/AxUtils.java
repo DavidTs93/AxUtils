@@ -8,8 +8,10 @@ import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.SmithingRecipe;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import com.comphenix.protocol.ProtocolLibrary;
+import com.comphenix.protocol.ProtocolManager;
+
 import me.Aldreda.AxUtils.Events.Callers.EventCallers;
-import me.Aldreda.AxUtils.Items.AxItemListeners;
 import me.Aldreda.AxUtils.Listeners.DisableDefaultFeaturesListener;
 import me.Aldreda.AxUtils.Utils.CitizensManager;
 import me.Aldreda.AxUtils.Utils.PlaceholderManager;
@@ -26,6 +28,7 @@ public class AxUtils extends JavaPlugin {
 	private static WorldGuardManager WorldGuardManager = null;
 	private static PlaceholderManager PAPIManager = null;
 	private static CitizensManager CitizensManager = null;
+	private static ProtocolManager ProtocolManager;
 
 	public void onLoad() {
 		if (getServer().getPluginManager().getPlugin("WorldGuard") != null) WorldGuardManager = new WorldGuardManager();
@@ -49,6 +52,7 @@ public class AxUtils extends JavaPlugin {
 		if (WorldGuardManager != null) Utils.chatColorsLogPlugin("&aHooked to &fWorldGuard");
 		if (PAPIManager != null) Utils.chatColorsLogPlugin("&aHooked to &fPlaceholderAPI");
 		if (CitizensManager != null) Utils.chatColorsLogPlugin("&aHooked to &fCitizens");
+		if (ProtocolManager != null) Utils.chatColorsLogPlugin("&aHooked to &fProtocolLib");
 	}
 
 	public void onDisable() {
@@ -60,9 +64,9 @@ public class AxUtils extends JavaPlugin {
 		disableNetheriteUpgrade();
 		new EventCallers();
 		new DisableDefaultFeaturesListener();
-		new AxItemListeners();
 		if (getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) PAPIManager = new PlaceholderManager();
 		if (getServer().getPluginManager().getPlugin("Citizens") != null) CitizensManager = new CitizensManager();
+		if (getServer().getPluginManager().getPlugin("ProtocolLib") != null) ProtocolManager = ProtocolLibrary.getProtocolManager();
 	}
 
 	private void disableNetheriteUpgrade() {
@@ -106,5 +110,9 @@ public class AxUtils extends JavaPlugin {
 	
 	public static final CitizensManager getCitizensManager() {
 		return CitizensManager;
+	}
+	
+	public static final ProtocolManager getProtocolManager() {
+		return ProtocolManager;
 	}
 }

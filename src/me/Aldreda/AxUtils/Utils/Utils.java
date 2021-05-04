@@ -654,7 +654,7 @@ public class Utils {
 	}
 	
 	public static Inventory makeInventory(InventoryHolder owner, int lines, Component name) {
-		if (name == null) Bukkit.createInventory(owner,lines * 9);
+		if (name == null) return Bukkit.createInventory(owner,lines * 9);
 		return Bukkit.createInventory(owner,lines * 9,name);
 	}
 	
@@ -662,5 +662,10 @@ public class Utils {
 		long id = System.currentTimeMillis() - (long)1e11;
 		for (int i = 0; i < ThreadLocalRandom.current().nextInt(5,100); i++) id -= ThreadLocalRandom.current().nextLong((long) 1e10);
 		return id;
+	}
+	
+	public static boolean isPlayerNPC(Player player) {
+		if (AxUtils.getCitizensManager() == null) return false;
+		return AxUtils.getCitizensManager().isNPC(player);
 	}
 }

@@ -3,6 +3,7 @@ import java.lang.reflect.Array;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.function.Function;
 import java.util.Objects;
 
 @SuppressWarnings("unchecked")
@@ -10,7 +11,7 @@ public class Pair<F,S> {
 	private final F first;
 	private final S second;
 	
-	public Pair(F first, S second) {
+	protected Pair(F first, S second) {
 		this.first = first;
 		this.second = second;
 	}
@@ -40,6 +41,14 @@ public class Pair<F,S> {
 	
 	public int hashCode() {
 		return com.google.common.base.Objects.hashCode(new Object[]{this.first,this.second});
+	}
+	
+	public <F2> Pair<F2,S> mapFirst(Function<? super F,? extends F2> function) {
+		return of(function.apply(this.first),this.second);
+	}
+	
+	public <S2> Pair<F,S2> mapSecond(Function<? super S,? extends S2> function) {
+		return of(this.first,function.apply(this.second));
 	}
 	
 	public static <F,S> Pair<F,S> of(F first, S second) {

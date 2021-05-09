@@ -15,6 +15,8 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import com.destroystokyo.paper.event.inventory.PrepareResultEvent;
+
 import me.Aldreda.AxUtils.AxUtils;
 import me.Aldreda.AxUtils.Classes.Listener;
 import me.Aldreda.AxUtils.Utils.Utils;
@@ -35,7 +37,16 @@ public class DisableDefaultFeaturesListener extends Listener {
 		if (namespace.equalsIgnoreCase("minecraft") && key.equalsIgnoreCase("repair_item")) event.getInventory().setResult(null);
 	}
 	
-	@EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void disableGrindstoneRepairEvent(PrepareResultEvent event) {
+		ItemStack item1 = event.getInventory().getItem(0);
+		ItemStack item2 = event.getInventory().getItem(1);
+		if (event.getInventory().getType() == InventoryType.GRINDSTONE) if (!Utils.isNull(item1) && !Utils.isNull(item2)) event.setResult(null);
+		else if (event.getInventory().getType() == InventoryType.ANVIL) if (!Utils.isNull(event.getInventory().getItem(2)) && !Utils.isNull(item1) && !Utils.isNull(item2) &&
+				item1.getType() == item2.getType() && item1.getType() == event.getInventory().getItem(2).getType()) event.setResult(null);
+	}
+	
+	/*@EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
 	public void disableGrindstoneRepairEvent(InventoryClickEvent event) {
 		if (event.isCancelled() || event.getInventory().getType() != InventoryType.GRINDSTONE) return;
 		new BukkitRunnable() {
@@ -60,10 +71,10 @@ public class DisableDefaultFeaturesListener extends Listener {
 			event.setResult(null);
 			event.getInventory().setItem(2,null);
 		}
-	}
+	}*/
 	
 	@EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
-	public void disableRenaming(PrepareAnvilEvent event) {
+	public void disableAnvilCost(PrepareAnvilEvent event) {
 		if (event.getViewers().isEmpty()) return;
 		new BukkitRunnable() {
 			public void run() {

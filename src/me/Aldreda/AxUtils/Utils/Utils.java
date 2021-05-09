@@ -658,6 +658,11 @@ public class Utils {
 		return Bukkit.createInventory(owner,lines * 9,name);
 	}
 	
+	public static Inventory makeInventory(InventoryHolder owner, InventoryType type, Component name) {
+		if (name == null) return Bukkit.createInventory(owner,type);
+		return Bukkit.createInventory(owner,type,name);
+	}
+	
 	public static long newSessionID() {
 		long id = System.currentTimeMillis() - (long)1e11;
 		for (int i = 0; i < ThreadLocalRandom.current().nextInt(5,100); i++) id -= ThreadLocalRandom.current().nextLong((long) 1e10);

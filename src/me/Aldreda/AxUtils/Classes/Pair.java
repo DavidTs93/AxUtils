@@ -62,7 +62,8 @@ public class Pair<F,S> {
 	}
 	
 	public static <F,S> Pair<F,S>[] fromMap(Map<F,S> map) {
-		Pair<F,S>[] arr = (Pair<F,S>[]) Array.newInstance(Pair.class,map.size());
+		Pair<F,S>[] arr = (Pair<F,S>[]) Array.newInstance(Pair.class,map == null ? 0 : map.size());
+		if (map == null) return arr;
 		int i = 0;
 		for (Entry<F,S> entry : map.entrySet()) arr[i++] = (of(entry.getKey(),entry.getValue()));
 		return arr;

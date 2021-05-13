@@ -3,6 +3,7 @@ package me.Aldreda.AxUtils;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
 import me.Aldreda.AxUtils.Events.Callers.EventCallers;
+import me.Aldreda.AxUtils.Listeners.CancelPlayers;
 import me.Aldreda.AxUtils.Listeners.DisableDefaultFeaturesListener;
 import me.Aldreda.AxUtils.Utils.CitizensManager;
 import me.Aldreda.AxUtils.Utils.PlaceholderManager;
@@ -62,6 +63,7 @@ public class AxUtils extends JavaPlugin {
 		disableNetheriteUpgrade();
 		new EventCallers();
 		new DisableDefaultFeaturesListener();
+		new CancelPlayers(instance);
 		if (getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) PAPIManager = new PlaceholderManager();
 		if (getServer().getPluginManager().getPlugin("Citizens") != null) CitizensManager = new CitizensManager();
 		if (getServer().getPluginManager().getPlugin("ProtocolLib") != null) ProtocolManager = ProtocolLibrary.getProtocolManager();

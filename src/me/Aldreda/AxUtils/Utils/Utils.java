@@ -1,7 +1,9 @@
 package me.Aldreda.AxUtils.Utils;
 
+import com.sk89q.worldguard.session.Session;
 import me.Aldreda.AxUtils.AxUtils;
 import me.Aldreda.AxUtils.Classes.Pair;
+import me.Aldreda.AxUtils.Listeners.CancelPlayers;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.md_5.bungee.api.ChatColor;
@@ -17,8 +19,10 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionData;
 import org.bukkit.potion.PotionEffect;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.io.BukkitObjectInputStream;
 import org.bukkit.util.io.BukkitObjectOutputStream;
+import org.jetbrains.annotations.NotNull;
 import org.yaml.snakeyaml.external.biz.base64Coder.Base64Coder;
 
 import java.io.ByteArrayInputStream;
@@ -33,6 +37,7 @@ import java.util.regex.Pattern;
 public class Utils {
 	private static final Pattern pattern = Pattern.compile("&#[a-fA-F0-9]{6}");
 	private static final Pattern unicode = Pattern.compile("\\\\u\\+[a-fA-F0-9]{4}");
+	private static final Set<Long> sessionIDs = new HashSet<Long>();
 	private static List<Material> interactable = null;
 	
 	public static String javaVersion() {
@@ -639,14 +644,36 @@ public class Utils {
 		return Bukkit.createInventory(owner,type,name);
 	}
 	
+	/**
+	 * Lasts for 10 minutes
+	 */
 	public static long newSessionID() {
-		long id = System.currentTimeMillis() - (long)1e11;
-		for (int i = 0; i < ThreadLocalRandom.current().nextInt(5,100); i++) id -= ThreadLocalRandom.current().nextLong((long) 1e10);
+		long id = System.currentTimeMillis();
+		while (sessionIDs.contains(id)) id = System.currentTimeMillis();
+		long ID = id;
+		sessionIDs.add(ID);
+		new BukkitRunnable() {
+			public void run() {
+				sessionIDs.remove(ID);
+			}
+		}.runTaskLater(AxUtils.getInstance(),10 * 60 * 20);
 		return id;
 	}
 	
 	public static boolean isPlayerNPC(Player player) {
 		if (AxUtils.getCitizensManager() == null) return false;
 		return AxUtils.getCitizensManager().isNPC(player);
+	}
+	
+	public static void addCancelledPlayer(@NotNull Player player) {
+		CancelPlayers.addPlayer(player);
+	}
+	
+	public static void removeCancelledPlayer(@NotNull Player player) {
+		CancelPlayers.removePlayer(player);
+	}
+	
+	public static boolean isPlayerCancelled(@NotNull Player player) {
+		return CancelPlayers.isPlayerCancelled(player);
 	}
 }

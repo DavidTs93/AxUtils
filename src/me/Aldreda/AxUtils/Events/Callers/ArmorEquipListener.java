@@ -1,8 +1,10 @@
 package me.Aldreda.AxUtils.Events.Callers;
 
-import java.util.Arrays;
-import java.util.List;
-
+import me.Aldreda.AxUtils.AxUtils;
+import me.Aldreda.AxUtils.Classes.Listener;
+import me.Aldreda.AxUtils.Enums.EquipMethod;
+import me.Aldreda.AxUtils.Events.ArmorEquipEvent;
+import me.Aldreda.AxUtils.Utils.Utils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -12,22 +14,15 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockDispenseArmorEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
-import org.bukkit.event.inventory.ClickType;
-import org.bukkit.event.inventory.InventoryAction;
-import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryDragEvent;
-import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.event.inventory.*;
 import org.bukkit.event.inventory.InventoryType.SlotType;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemBreakEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
-import me.Aldreda.AxUtils.AxUtils;
-import me.Aldreda.AxUtils.Classes.Listener;
-import me.Aldreda.AxUtils.Enums.EquipMethod;
-import me.Aldreda.AxUtils.Events.ArmorEquipEvent;
-import me.Aldreda.AxUtils.Utils.Utils;
+import java.util.Arrays;
+import java.util.List;
 
 public class ArmorEquipListener extends Listener {
 	
@@ -48,7 +43,11 @@ public class ArmorEquipListener extends Listener {
 		ItemStack current = event.getCurrentItem();
 		int slot = event.getRawSlot();
 		boolean shift = event.getClick().equals(ClickType.SHIFT_LEFT) || event.getClick().equals(ClickType.SHIFT_RIGHT);
-		EquipmentSlot equipSlot = (shift ? current : cursor).getType().getEquipmentSlot();
+		EquipmentSlot equipSlot;
+		if (event.getSlotType() == SlotType.ARMOR) {
+			equipSlot = cursor.getType().getEquipmentSlot();
+			if (equipSlot == null || getSlot(equipSlot) == -1) equipSlot = current.getType().getEquipmentSlot();
+		} else equipSlot = (shift ? current : cursor).getType().getEquipmentSlot();
 		if (!shift && equipSlot != null && slot != getSlot(equipSlot)) return;
 		ArmorEquipEvent armorEquipEvent = null;
 		boolean numberKey = event.getAction().equals(InventoryAction.HOTBAR_SWAP);

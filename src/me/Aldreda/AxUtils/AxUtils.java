@@ -1,16 +1,7 @@
 package me.Aldreda.AxUtils;
 
-import java.sql.SQLException;
-import java.util.Iterator;
-
-import org.bukkit.Bukkit;
-import org.bukkit.inventory.Recipe;
-import org.bukkit.inventory.SmithingRecipe;
-import org.bukkit.plugin.java.JavaPlugin;
-
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
-
 import me.Aldreda.AxUtils.Events.Callers.EventCallers;
 import me.Aldreda.AxUtils.Listeners.DisableDefaultFeaturesListener;
 import me.Aldreda.AxUtils.Utils.CitizensManager;
@@ -18,6 +9,13 @@ import me.Aldreda.AxUtils.Utils.PlaceholderManager;
 import me.Aldreda.AxUtils.Utils.Utils;
 import me.Aldreda.AxUtils.Utils.WorldGuardManager;
 import me.DMan16.AxEconomy.AxEconomy;
+import org.bukkit.Bukkit;
+import org.bukkit.inventory.Recipe;
+import org.bukkit.inventory.SmithingRecipe;
+import org.bukkit.plugin.java.JavaPlugin;
+
+import java.sql.SQLException;
+import java.util.Iterator;
 
 public class AxUtils extends JavaPlugin {
 	private static AxUtils instance = null;

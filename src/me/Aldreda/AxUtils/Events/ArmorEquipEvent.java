@@ -15,13 +15,13 @@ public final class ArmorEquipEvent extends PlayerEvent implements Cancellable {
 	private final EquipMethod method;
 	private final EquipmentSlot slot;
 	private final ItemStack oldArmor;
-	private ItemStack newArmor;
+	private final ItemStack newArmor;
 	private final int hotbar;
 	
 	public ArmorEquipEvent(Player player, EquipMethod method, EquipmentSlot slot, ItemStack oldArmor, ItemStack newArmor) {
 		this(player,method,slot,oldArmor,newArmor,-1);
 	}
-
+	
 	/**
 	 * @param player the player
 	 * @param method EquipMethod
@@ -63,15 +63,11 @@ public final class ArmorEquipEvent extends PlayerEvent implements Cancellable {
 	}
 	
 	public ItemStack getOldArmor() {
-		return oldArmor == null ? null : oldArmor.clone();
+		return oldArmor == null ? null : oldArmor;
 	}
 	
 	public ItemStack getNewArmor() {
-		return newArmor;
-	}
-	
-	public ItemStack setNewArmor(ItemStack newArmor) {
-		return this.newArmor = newArmor;
+		return newArmor == null ? null : newArmor;
 	}
 	
 	public int getHotbarSlot() {

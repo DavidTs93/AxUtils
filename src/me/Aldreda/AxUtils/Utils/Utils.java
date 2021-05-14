@@ -201,7 +201,16 @@ public class Utils {
 		return String.join(regJoin,str.split(regSplit));
 	}
 	
-	public static ItemStack getFromSlot(Player player, int slot) {
+	public static List<Integer> getPlayerInventorySlots() {
+		List<Integer> slots = new ArrayList<Integer>();
+		slots.add(-106);
+		for (int i = 0; i < 4 * 9; i++) slots.add(i);
+		for (int i = 100; i <= 103; i++) slots.add(i);
+		return slots;
+	}
+	
+	public static ItemStack getFromSlot(@NotNull Player player, int slot) {
+		if (player == null) return null;
 		ItemStack item = null;
 		if (slot == -106) item = player.getInventory().getItemInOffHand();
 		else if (slot < 0) return item;
@@ -215,11 +224,11 @@ public class Utils {
 	
 	public static int getSlot(Player player, EquipmentSlot slot) {
 		if (slot == null) return -1;
-		if (slot == EquipmentSlot.HEAD) return 103;
-		if (slot == EquipmentSlot.CHEST) return 102;
-		if (slot == EquipmentSlot.LEGS) return 101;
-		if (slot == EquipmentSlot.FEET) return 100;
-		if (slot == EquipmentSlot.OFF_HAND) return -106;
+		else if (slot == EquipmentSlot.HEAD) return 103;
+		else if (slot == EquipmentSlot.CHEST) return 102;
+		else if (slot == EquipmentSlot.LEGS) return 101;
+		else if (slot == EquipmentSlot.FEET) return 100;
+		else if (slot == EquipmentSlot.OFF_HAND) return -106;
 		return player.getInventory().getHeldItemSlot();
 	}
 	
@@ -625,12 +634,9 @@ public class Utils {
 		for (Material material : materials) if (material != null) addInteractable(material);
 	}
 	
-	public static <V> List<V> joinLists(List<? extends V> list1, List<? extends V> list2) {
-		if (list1 == null) list1 = new ArrayList<V>();
-		if (list2 == null) list2 = new ArrayList<V>();
+	public static <V> List<V> joinLists(List<? extends V> ... lists) {
 		List<V> list = new ArrayList<V>();
-		for (V obj : list1) list.add(obj);
-		for (V obj : list2) list.add(obj);
+		for (List<? extends V> l : lists) if (l != null) list.addAll(l);
 		return list;
 	}
 	

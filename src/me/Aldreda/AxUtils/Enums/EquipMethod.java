@@ -7,7 +7,9 @@ public enum EquipMethod {
 	PICK_DROP,
 	RIGHT_CLICK,
 	HOTBAR_SWAP,
+	OFFHAND_SWAP,
 	DISPENSER,
 	BROKE,
+	DROP,
 	DEATH;
 }

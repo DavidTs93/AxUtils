@@ -2,6 +2,7 @@ package me.Aldreda.AxUtils.Enums;
 
 public enum EquipMethod {
 	CUSTOM,
+	CREATIVE,
 	SHIFT_CLICK,
 	DRAG,
 	PICK_DROP,

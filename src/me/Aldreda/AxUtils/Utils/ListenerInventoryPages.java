@@ -1,19 +1,21 @@
 package me.Aldreda.AxUtils.Utils;
 
-import java.util.Objects;
-
+import me.Aldreda.AxUtils.AxUtils;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitRunnable;
 
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextDecoration;
+import java.util.Objects;
 
 public abstract class ListenerInventoryPages extends ListenerInventory {
 	protected int currentPage = 1;
@@ -23,12 +25,21 @@ public abstract class ListenerInventoryPages extends ListenerInventory {
 			NamedTextColor.GREEN).decoration(TextDecoration.ITALIC,false),ItemFlag.values());
 	protected static ItemStack previous = Utils.makeItem(Material.ARROW,Component.translatable("spectatorMenu.previous_page",
 			NamedTextColor.GOLD).decoration(TextDecoration.ITALIC,false),ItemFlag.values());
+	protected int closeSlot = inventory.getSize() - 5;
+	protected int nextSlot = inventory.getSize() - 1;
+	protected int previousSlot = inventory.getSize() - 9;
+	protected int size;
+	protected Player player;
+	protected boolean alwaysSetNext = false;
+	protected boolean alwaysSetPrevious = false;
 	
 	/**
 	 * @param lines Number of lines NOT including the bottom (Close,Next,Previous)
 	 */
-	public ListenerInventoryPages(Player owner, Player player, int lines, Component name, JavaPlugin plugin, Object ... objs) {
+	public ListenerInventoryPages(InventoryHolder owner, Player player, int lines, Component name, JavaPlugin plugin, Object ... objs) {
 		super(Utils.makeInventory(owner,Objects.requireNonNull(lines > 5 || lines < 1 ? null : lines + 1),name));
+		size = (lines + 1) * 9;
+		this.player = player;
 		first(objs);
 		setPage(1);
 		register(plugin);
@@ -41,14 +52,14 @@ public abstract class ListenerInventoryPages extends ListenerInventory {
 		int slot = event.getRawSlot();
 		ClickType click = event.getClick();
 		if (firstSlotCheck(slot,click)) return;
-		event.setCancelled(true);
+		if (cancelCheck(slot,click)) event.setCancelled(true);
 		if (!click.isRightClick() && !click.isLeftClick()) return;
 		if (secondSlotCheck(slot,click)) return;
 		ItemStack slotItem = event.getView().getItem(slot);
 		if (isEmpty(slotItem)) return;
-		if (slot == inventory.getSize() - 5 && Utils.sameItem(slotItem,close)) event.getView().close();
-		else if (slot == inventory.getSize() - 1 && Utils.sameItem(slotItem,next)) setPage(currentPage + 1);
-		else if (slot == inventory.getSize() - 9 && Utils.sameItem(slotItem,previous)) setPage(currentPage - 1);
+		if (slot == closeSlot) event.getView().close();
+		else if (slot == nextSlot) setPage(currentPage + 1);
+		else if (slot == previousSlot) setPage(currentPage - 1);
 		else otherSlot(event,slot,slotItem);
 	}
 	
@@ -58,19 +69,46 @@ public abstract class ListenerInventoryPages extends ListenerInventory {
 	
 	public void setPage(int page) {
 		if (page < 1 || (page == 1 && maxPage() == 0) || page > maxPage()) return;
+		beforeSetPage(page);
 		currentPage = page;
 		reset();
 		setPageContents(page);
-		inventory.setItem(inventory.getSize() - 5,close);
-		if (page < maxPage()) inventory.setItem(inventory.getSize() - 1,next);
-		if (page > 1) inventory.setItem(inventory.getSize() - 9,previous);
+		inventory.setItem(closeSlot,close(page));
+		if (alwaysSetNext || page < maxPage()) inventory.setItem(nextSlot,next(page));
+		if (alwaysSetPrevious || page > 1) inventory.setItem(previousSlot,previous(page));
+		cancelCloseUnregister = true;
+		player.openInventory(inventory);
+		new BukkitRunnable() {
+			public void run() {
+				cancelCloseUnregister = false;
+			}
+		}.runTask(AxUtils.getInstance());
+	}
+	
+	protected void beforeSetPage(int page) {
 	}
 	
 	protected void first(Object ... objs) {
 	}
 	
+	protected ItemStack close(int page) {
+		return close;
+	}
+	
+	protected ItemStack next(int page) {
+		return next;
+	}
+	
+	protected ItemStack previous(int page) {
+		return previous;
+	}
+	
 	protected boolean isEmpty(ItemStack item) {
 		return Utils.isNull(item);
+	}
+	
+	protected boolean cancelCheck(int slot, ClickType click) {
+		return true;
 	}
 	
 	protected boolean firstSlotCheck(int slot, ClickType click) {
@@ -78,8 +116,7 @@ public abstract class ListenerInventoryPages extends ListenerInventory {
 	}
 	
 	protected boolean secondSlotCheck(int slot, ClickType click) {
-		if (click == ClickType.CREATIVE) return true;
-		return false;
+		return click.isCreativeAction();
 	}
 	
 	protected abstract void setPageContents(int page);

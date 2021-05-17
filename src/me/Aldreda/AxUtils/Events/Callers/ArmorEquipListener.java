@@ -21,9 +21,6 @@ import org.bukkit.event.player.PlayerItemBreakEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.Arrays;
-import java.util.List;
-
 public class ArmorEquipListener extends Listener {
 	
 	public ArmorEquipListener() {
@@ -33,11 +30,10 @@ public class ArmorEquipListener extends Listener {
 	@SuppressWarnings("unused")
 	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
 	public void inventoryClick(InventoryClickEvent event) {
-		if (event.isCancelled()) return;
-		if(event.getAction() == InventoryAction.NOTHING) return;
-		List<InventoryType> invs = Arrays.asList(InventoryType.CRAFTING,InventoryType.CREATIVE,InventoryType.PLAYER);
-		if (!invs.contains(event.getInventory().getType()) || !(event.getWhoClicked() instanceof Player) || event.getClick().isCreativeAction()) return;
+		if (event.isCancelled() || event.getAction() == InventoryAction.NOTHING || event.getClick() == ClickType.MIDDLE ||
+				(event.getInventory().getType() != InventoryType.CRAFTING && event.getInventory().getType() != InventoryType.CREATIVE) || !(event.getWhoClicked() instanceof Player)) return;
 		if (event.getSlotType() != SlotType.ARMOR && event.getSlotType() != SlotType.QUICKBAR && event.getSlotType() != SlotType.CONTAINER) return;
+		if (event.getClick() == ClickType.CREATIVE && event.getSlotType() != SlotType.ARMOR) return;
 		Player player = (Player) event.getWhoClicked();
 		ItemStack current = event.getCurrentItem();
 		int slot = event.getSlot();
@@ -77,7 +73,7 @@ public class ArmorEquipListener extends Listener {
 		} else {
 			oldArmor = Utils.getFromSlot(player,slot);
 			newArmor = event.getCursor();
-			method = EquipMethod.PICK_DROP;
+			method = event.getClick() == ClickType.CREATIVE ? EquipMethod.CREATIVE : EquipMethod.PICK_DROP;
 		}
 		ArmorEquipEvent armorEquipEvent = new ArmorEquipEvent(player,method,equipSlot,oldArmor,newArmor);
 		Bukkit.getServer().getPluginManager().callEvent(armorEquipEvent);

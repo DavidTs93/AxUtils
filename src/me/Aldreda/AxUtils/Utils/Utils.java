@@ -1,6 +1,6 @@
 package me.Aldreda.AxUtils.Utils;
 
-import com.sk89q.worldguard.session.Session;
+import com.google.common.collect.Lists;
 import me.Aldreda.AxUtils.AxUtils;
 import me.Aldreda.AxUtils.Classes.Pair;
 import me.Aldreda.AxUtils.Listeners.CancelPlayers;
@@ -27,10 +27,12 @@ import org.yaml.snakeyaml.external.biz.base64Coder.Base64Coder;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.text.DecimalFormat;
 import java.util.*;
 import java.util.Map.Entry;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -248,8 +250,8 @@ public class Utils {
 	public static boolean sameItem(ItemStack item1, ItemStack item2) {
 		if (item1 == null || item2 == null) return item1 == item2;
 		if (item1 == item2 || item1.equals(item2)) return true;
-		ItemStack cmp1 = asQuantity(item1,1);
-		ItemStack cmp2 = asQuantity(item2,1);
+		ItemStack cmp1 = item1.asQuantity(1);
+		ItemStack cmp2 = item2.asQuantity(1);
 		return cmp1 == cmp2 || cmp1.equals(cmp2);
 	}
 	
@@ -259,8 +261,8 @@ public class Utils {
 	public static boolean similarItem(ItemStack item1, ItemStack item2) {
 		if (item1 == null || item2 == null) return item1 == item2;
 		if (item1 == item2 || item1.equals(item2)) return true;
-		ItemStack cmp1 = asQuantity(item1,1);
-		ItemStack cmp2 = asQuantity(item2,1);
+		ItemStack cmp1 = item1.asQuantity(1);
+		ItemStack cmp2 = item2.asQuantity(1);
 		if (cmp1 == cmp2 || cmp1.equals(cmp2)) return true;
 		ItemMeta meta1 = cmp1.getItemMeta();
 		ItemMeta meta2 = cmp2.getItemMeta();
@@ -282,9 +284,6 @@ public class Utils {
 		Player player = (Player) event.getWhoClicked();
 		Inventory inv = event.getInventory();
 		ItemStack result = inv.getItem(2);
-		/*String item1 = event.getInventory().getItem(0).getItemMeta().getDisplayName();
-		if (!Utils.chatColorsStrip(item1).equals(Utils.chatColorsStrip(result.getItemMeta().getDisplayName())) ||
-				(item1.contains("§o") && !result.getItemMeta().getDisplayName().contains("§o"))) return;*/
 		if (event.isShiftClick()) {
 			if (player.getInventory().firstEmpty() == -1) {
 				event.setCancelled(true);
@@ -580,19 +579,6 @@ public class Utils {
 		Bukkit.getServer().sendMessage(component);
 	}
 	
-	public static ItemStack asQuantity(ItemStack item, int amount) {
-		return asQuantity(item,amount,false);
-	}
-	
-	public static ItemStack asQuantity(ItemStack item, int amount, boolean allowIllegal) {
-		if (isNull(item)) return item;
-		ItemStack clone = item.clone();
-		int newAmount = Math.max(1,amount);
-		if (!allowIllegal) newAmount = Math.min(newAmount,clone.getMaxStackSize());
-		clone.setAmount(newAmount);
-		return clone;
-	}
-	
 	public static boolean isInteractable(Material material) {
 		if (interactable == null) createInteractable();
 		return interactable.contains(material);
@@ -673,6 +659,10 @@ public class Utils {
 	
 	public static void addCancelledPlayer(@NotNull Player player) {
 		CancelPlayers.addPlayer(player);
+	}
+	
+	public static void addCancelledPlayer(@NotNull Player player, boolean allowRotation, boolean disableDamage) {
+		CancelPlayers.addPlayer(player,allowRotation,disableDamage);
 	}
 	
 	public static void removeCancelledPlayer(@NotNull Player player) {

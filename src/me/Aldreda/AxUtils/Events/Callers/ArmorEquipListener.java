@@ -18,6 +18,7 @@ import org.bukkit.event.inventory.*;
 import org.bukkit.event.inventory.InventoryType.SlotType;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemBreakEvent;
+import org.bukkit.inventory.CraftingInventory;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
@@ -30,10 +31,12 @@ public class ArmorEquipListener extends Listener {
 	@SuppressWarnings("unused")
 	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
 	public void inventoryClick(InventoryClickEvent event) {
-		if (event.isCancelled() || event.getAction() == InventoryAction.NOTHING || event.getClick() == ClickType.MIDDLE ||
-				(event.getInventory().getType() != InventoryType.CRAFTING && event.getInventory().getType() != InventoryType.CREATIVE) || !(event.getWhoClicked() instanceof Player)) return;
+		if (event.isCancelled() || event.getAction() == InventoryAction.NOTHING || event.getClick() == ClickType.MIDDLE || !(event.getInventory() instanceof CraftingInventory) ||
+				(event.getView().getType() != InventoryType.CREATIVE && event.getView().getType() != InventoryType.CRAFTING) || !(event.getWhoClicked() instanceof Player)) return;
 		if (event.getSlotType() != SlotType.ARMOR && event.getSlotType() != SlotType.QUICKBAR && event.getSlotType() != SlotType.CONTAINER) return;
 		if (event.getClick() == ClickType.CREATIVE && event.getSlotType() != SlotType.ARMOR) return;
+		boolean shift = event.getClick() == ClickType.SHIFT_LEFT || event.getClick() == ClickType.SHIFT_RIGHT;
+		if ((event.getSlotType() == SlotType.CONTAINER || event.getSlotType() == SlotType.QUICKBAR) && !shift) return;
 		Player player = (Player) event.getWhoClicked();
 		ItemStack current = event.getCurrentItem();
 		int slot = event.getSlot();
@@ -46,7 +49,6 @@ public class ArmorEquipListener extends Listener {
 		else if (slot == 103) equipSlot = EquipmentSlot.HEAD;
 		else equipSlot = current.getType().getEquipmentSlot();
 		if (equipSlot == null) return;
-		boolean shift = event.getClick() == ClickType.SHIFT_LEFT || event.getClick() == ClickType.SHIFT_RIGHT;
 		boolean hotbar = event.getClick() == ClickType.NUMBER_KEY;
 		boolean offhand = event.getClick() == ClickType.SWAP_OFFHAND;
 		boolean drop = event.getClick() == ClickType.DROP || event.getClick() == ClickType.CONTROL_DROP;

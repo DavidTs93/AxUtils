@@ -1,14 +1,5 @@
 package me.Aldreda.AxUtils.Utils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Objects;
-
-import org.bukkit.Location;
-
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldguard.WorldGuard;
@@ -20,6 +11,9 @@ import com.sk89q.worldguard.protection.flags.registry.FlagRegistry;
 import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import com.sk89q.worldguard.protection.regions.RegionContainer;
+import org.bukkit.Location;
+
+import java.util.*;
 
 public class WorldGuardManager {
 	public final FlagRegistry FlagRegistry;
@@ -35,13 +29,13 @@ public class WorldGuardManager {
 		return null;
 	}
 	
-	private ApplicableRegionSet getRegionSet(Location loc) {
+	public ApplicableRegionSet getRegionSet(Location loc) {
 		RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
 		RegionManager regions = container.get(BukkitAdapter.adapt(loc.getWorld()));
 		return ((RegionManager) Objects.requireNonNull(regions)).getApplicableRegions(BlockVector3.at(loc.getX(),loc.getY(),loc.getZ()));
 	}
 	
-	private ProtectedRegion[] sortRegionsByPriority(ApplicableRegionSet regset) {
+	public ProtectedRegion[] sortRegionsByPriority(ApplicableRegionSet regset) {
 		ProtectedRegion[] regionArray = new ProtectedRegion[0];
 		List<ProtectedRegion> regionList = new ArrayList<ProtectedRegion>();
 		if (regset.size() == 0) return regionArray;

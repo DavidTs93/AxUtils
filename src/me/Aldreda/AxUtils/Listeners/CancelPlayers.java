@@ -2,10 +2,12 @@ package me.Aldreda.AxUtils.Listeners;
 
 import me.Aldreda.AxUtils.AxUtils;
 import me.Aldreda.AxUtils.Classes.Listener;
+import me.Aldreda.AxUtils.Classes.Pair;
 import me.Aldreda.AxUtils.Utils.Utils;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -16,6 +18,8 @@ import java.util.Set;
 
 public class CancelPlayers extends Listener {
 	private static final Set<Player> players = new HashSet<Player>();
+	private static final Set<Player> rotatable = new HashSet<Player>();
+	private static final Set<Player> noDamage = new HashSet<Player>();
 	private static MoveListener move = null;
 	
 	public CancelPlayers(JavaPlugin plugin) {
@@ -23,14 +27,28 @@ public class CancelPlayers extends Listener {
 	}
 	
 	public static void addPlayer(@NotNull Player player) {
+		addPlayer(player,false,false);
+	}
+	
+	public static void addPlayer(@NotNull Player player, boolean allowRotation, boolean disableDamage) {
 		if (player == null || Utils.isPlayerNPC(player)) return;
 		players.add(player);
+		if (allowRotation) rotatable.add(player);
+		if (disableDamage) noDamage.add(player);
 		check();
+	}
+	
+	public static Pair<Boolean,Boolean> getPlayer(@NotNull Player player) {
+		if (player == null || Utils.isPlayerNPC(player)) return null;
+		if (players.contains(player)) return Pair.of(rotatable.contains(player),noDamage.contains(player));
+		return null;
 	}
 	
 	public static void removePlayer(@NotNull Player player) {
 		if (player == null) return;
 		players.remove(player);
+		rotatable.remove(player);
+		noDamage.remove(player);
 		check();
 	}
 	
@@ -84,6 +102,14 @@ public class CancelPlayers extends Listener {
 		if (players.contains(event.getPlayer())) event.setCancelled(true);
 	}
 	
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void onDamage(EntityDamageEvent event) {
+		if ((event.getEntity() instanceof Player) && noDamage.contains((Player) event.getEntity())) {
+			event.setCancelled(true);
+			event.setDamage(0);
+		}
+	}
+	
 	private static class MoveListener extends Listener {
 		
 		private MoveListener() {
@@ -97,7 +123,9 @@ public class CancelPlayers extends Listener {
 		
 		@EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
 		public void onMove(PlayerMoveEvent event) {
-			if (players.contains(event.getPlayer())) event.setCancelled(true);
+			if (!players.contains(event.getPlayer())) return;
+			if (!event.hasChangedBlock() && event.hasChangedOrientation() && rotatable.contains(players)) return;
+			event.setCancelled(true);
 		}
 	}
 }

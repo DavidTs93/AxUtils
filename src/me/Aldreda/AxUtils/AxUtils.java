@@ -11,6 +11,7 @@ import me.Aldreda.AxUtils.Utils.Utils;
 import me.Aldreda.AxUtils.Utils.WorldGuardManager;
 import me.DMan16.AxEconomy.AxEconomy;
 import org.bukkit.Bukkit;
+import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.SmithingRecipe;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -43,6 +44,7 @@ public class AxUtils extends JavaPlugin {
 			this.getLogger().severe("MySQL error: ");
 			e.printStackTrace();
 			Bukkit.getPluginManager().disablePlugin(this);
+			Bukkit.shutdown();
 			return;
 		}
 		Utils.chatColorsLogPlugin("&aConnected to MySQL database");
@@ -60,7 +62,8 @@ public class AxUtils extends JavaPlugin {
 	}
 	
 	private void firstOfAll() {
-		disableNetheriteUpgrade();
+		//disableNetheriteUpgrade();
+		disableEnderChest();
 		new EventCallers();
 		new DisableDefaultFeaturesListener();
 		new CancelPlayers(instance);
@@ -68,7 +71,7 @@ public class AxUtils extends JavaPlugin {
 		if (getServer().getPluginManager().getPlugin("Citizens") != null) CitizensManager = new CitizensManager();
 		if (getServer().getPluginManager().getPlugin("ProtocolLib") != null) ProtocolManager = ProtocolLibrary.getProtocolManager();
 	}
-
+	
 	private void disableNetheriteUpgrade() {
 		Iterator<Recipe> recipes = Bukkit.getServer().recipeIterator();
 		while (recipes.hasNext()) {
@@ -79,6 +82,10 @@ public class AxUtils extends JavaPlugin {
 				if (namespace.equals("minecraft") && key.startsWith("netherite_") && key.endsWith("_smithing")) recipes.remove();
 			}
 		}
+	}
+	
+	private void disableEnderChest() {
+		Bukkit.removeRecipe(NamespacedKey.minecraft("ender_chest"));
 	}
 	
 	public static final AxUtils getInstance() {

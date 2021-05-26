@@ -1,12 +1,7 @@
 package me.Aldreda.AxUtils.Utils;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.List;
-
 import org.bukkit.Bukkit;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Trident;
 import org.bukkit.event.entity.EntityPotionEffectEvent.Cause;
@@ -14,9 +9,16 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.List;
+
 @SuppressWarnings("deprecation")
 public class ReflectionUtils {
 	public static String version = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
+	private static NamespacedKey enchantGlowKey = Utils.namespacedKey("enchant_glow");
 	//public static Object space = ReflectionUtils.buildIChatBaseComponent(" ",false);
 
 	/**
@@ -53,13 +55,14 @@ public class ReflectionUtils {
 	}
 	
 	/**
-	 * @param CraftBukkit ItemStack
-	 * @return item Bukkit ItemStack
+	 * @param item CraftBukkit ItemStack
+	 * @return Bukkit ItemStack
 	 */
 	public static ItemStack ItemAsBukkitCopy(Object item) {
 		try {
 			Class<?> craftItemClass = Class.forName("org.bukkit.craftbukkit." + version + ".inventory.CraftItemStack");
-			Method methodBukkitCopy = craftItemClass.getMethod("asBukkitCopy",craftItemClass);
+			Class<?> itemClass = Class.forName("net.minecraft.server." + version + ".ItemStack");
+			Method methodBukkitCopy = craftItemClass.getMethod("asBukkitCopy",itemClass);
 			return (ItemStack) methodBukkitCopy.invoke(null,item);
 		} catch (Exception e) {}
 		return null;

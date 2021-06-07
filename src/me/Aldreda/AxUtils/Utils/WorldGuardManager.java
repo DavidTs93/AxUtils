@@ -12,6 +12,7 @@ import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import com.sk89q.worldguard.protection.regions.RegionContainer;
 import org.bukkit.Location;
+import org.bukkit.World;
 
 import java.util.*;
 
@@ -27,6 +28,12 @@ public class WorldGuardManager {
 			return Arrays.asList(sortRegionsByPriority(getRegionSet(loc)));
 		} catch (Exception e) {}
 		return null;
+	}
+	
+	public Map<String,ProtectedRegion> getRegions(World world) {
+		RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
+		RegionManager regions = container.get(BukkitAdapter.adapt(Objects.requireNonNull(world)));
+		return regions.getRegions();
 	}
 	
 	public ApplicableRegionSet getRegionSet(Location loc) {

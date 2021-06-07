@@ -7,7 +7,10 @@ import me.Aldreda.AxUtils.Utils.Utils;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
+import org.bukkit.event.entity.EntityAirChangeEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityPotionEffectEvent;
+import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -31,7 +34,7 @@ public class CancelPlayers extends Listener {
 	}
 	
 	public static void addPlayer(@NotNull Player player, boolean allowRotation, boolean disableDamage) {
-		if (player == null || Utils.isPlayerNPC(player)) return;
+		if (player == null || Utils.isPlayerNPC(player) || players.contains(player)) return;
 		players.add(player);
 		if (allowRotation) rotatable.add(player);
 		if (disableDamage) noDamage.add(player);
@@ -65,7 +68,7 @@ public class CancelPlayers extends Listener {
 		} else if (move == null) move = new MoveListener();
 	}
 	
-	@EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
+	@EventHandler(priority = EventPriority.LOWEST)
 	public void unregisterOnLeaveEvent(PlayerQuitEvent event) {
 		removePlayer(event.getPlayer());
 	}
@@ -108,6 +111,26 @@ public class CancelPlayers extends Listener {
 			event.setCancelled(true);
 			event.setDamage(0);
 		}
+	}
+	
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void onAirChange(EntityAirChangeEvent event) {
+		if ((event.getEntity() instanceof Player) && noDamage.contains((Player) event.getEntity())) event.setCancelled(true);
+	}
+	
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void onTarget(EntityTargetEvent event) {
+		if (event.getTarget() != null && (event.getTarget() instanceof Player) && noDamage.contains((Player) event.getTarget())) event.setCancelled(true);
+	}
+	
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void onPotion(EntityPotionEffectEvent event) {
+		if ((event.getEntity() instanceof Player) && noDamage.contains((Player) event.getEntity())) event.setCancelled(true);
+	}
+	
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void onItemDamage(PlayerItemDamageEvent event) {
+		if (noDamage.contains(event.getPlayer())) event.setCancelled(true);
 	}
 	
 	private static class MoveListener extends Listener {

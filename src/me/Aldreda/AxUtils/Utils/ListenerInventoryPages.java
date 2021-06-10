@@ -90,6 +90,9 @@ public abstract class ListenerInventoryPages extends ListenerInventory {
 	
 	protected void first(Object ... objs) {
 	}
+	protected boolean isBorder(int slot) {
+		return (slot >= 0 && slot < 9) || (slot >= inventory.getSize() - 9 && slot < inventory.getSize()) || (slot % 9) == 0 || ((slot + 1) % 9) == 0;
+	}
 	
 	protected ItemStack close(int page) {
 		return close;

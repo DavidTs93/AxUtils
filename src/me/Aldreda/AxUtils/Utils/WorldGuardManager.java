@@ -24,16 +24,22 @@ public class WorldGuardManager {
 	}
 	
 	public List<ProtectedRegion> getRegions(Location loc) {
-		try {
-			return Arrays.asList(sortRegionsByPriority(getRegionSet(loc)));
-		} catch (Exception e) {}
-		return null;
+		return sortRegionsByPriority(getRegionSet(loc));
 	}
 	
 	public Map<String,ProtectedRegion> getRegions(World world) {
 		RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
 		RegionManager regions = container.get(BukkitAdapter.adapt(Objects.requireNonNull(world)));
-		return regions.getRegions();
+		return ((RegionManager) Objects.requireNonNull(regions)).getRegions();
+	}
+	
+	public List<ProtectedRegion> getRegions(ProtectedRegion region, World world) {
+		try {
+			RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
+			RegionManager regions = container.get(BukkitAdapter.adapt(world));
+			return sortRegionsByPriority(regions.getApplicableRegions(region));
+		} catch (Exception e) {}
+		return null;
 	}
 	
 	public ApplicableRegionSet getRegionSet(Location loc) {
@@ -42,19 +48,17 @@ public class WorldGuardManager {
 		return ((RegionManager) Objects.requireNonNull(regions)).getApplicableRegions(BlockVector3.at(loc.getX(),loc.getY(),loc.getZ()));
 	}
 	
-	public ProtectedRegion[] sortRegionsByPriority(ApplicableRegionSet regset) {
-		ProtectedRegion[] regionArray = new ProtectedRegion[0];
+	public List<ProtectedRegion> sortRegionsByPriority(ApplicableRegionSet regions) {
+		return sortRegionsByPriority(new ArrayList<ProtectedRegion>(regions.getRegions()));
+	}
+	
+	public List<ProtectedRegion> sortRegionsByPriority(List<ProtectedRegion> regions) {
 		List<ProtectedRegion> regionList = new ArrayList<ProtectedRegion>();
-		if (regset.size() == 0) return regionArray;
-		else if (regset.size() == 1) {
-			regionArray = new ProtectedRegion[1];
-			return (ProtectedRegion[]) regset.getRegions().toArray(regionArray);
-		} else {
-			Iterator<ProtectedRegion> iterator = regset.iterator();
-			while (iterator.hasNext()) regionList.add((ProtectedRegion) iterator.next());
+		if (regions != null && regions.size() > 0) {
+			regionList.addAll(regions);
 			regionList.sort(Comparator.comparingInt(ProtectedRegion::getPriority));
-			return (ProtectedRegion[]) regionList.toArray(regionArray);
 		}
+		return regionList;
 	}
 	
 	public StateFlag newStateFlag(String name, boolean defaultValue) {

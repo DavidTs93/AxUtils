@@ -1,7 +1,6 @@
 package me.Aldreda.AxUtils.Utils;
 
 import org.bukkit.Bukkit;
-import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Trident;
 import org.bukkit.event.entity.EntityPotionEffectEvent.Cause;
@@ -18,7 +17,6 @@ import java.util.List;
 @SuppressWarnings("deprecation")
 public class ReflectionUtils {
 	public static String version = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
-	private static NamespacedKey enchantGlowKey = Utils.namespacedKey("enchant_glow");
 	//public static Object space = ReflectionUtils.buildIChatBaseComponent(" ",false);
 
 	/**

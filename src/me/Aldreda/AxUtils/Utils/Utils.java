@@ -332,9 +332,9 @@ public class Utils {
 		return roman.toString();
 	}
 	
-	public static NamespacedKey namespacedKey(String name) {
+	/*public static NamespacedKey namespacedKey(String name) {
 		return new NamespacedKey(AxUtils.getInstance(),name);
-	}
+	}*/
 	
 	@SuppressWarnings("deprecation")
 	public static NamespacedKey namespacedKey(String prefix, String name) {
@@ -348,7 +348,11 @@ public class Utils {
 	}
 	
 	public static boolean isNull(ItemStack item) {
-		return item == null || item.getType().isAir();
+		return item == null || isNull(item.getType());
+	}
+	
+	public static boolean isNull(Material material) {
+		return material == null || material.isAir();
 	}
 	
 	public static JString JString(String str) {
@@ -671,5 +675,11 @@ public class Utils {
 	
 	public static boolean isPlayerCancelled(@NotNull Player player) {
 		return CancelPlayers.isPlayerCancelled(player);
+	}
+	
+	public static void savePlayer(@NotNull Player player) {
+		if (player == null || isPlayerNPC(player)) return;
+		player.saveData();
+//		if (Bukkit.getPluginManager().getPlugin("AxInventories") != null) me.DMan16.AxInventories.AxInventories.save();
 	}
 }

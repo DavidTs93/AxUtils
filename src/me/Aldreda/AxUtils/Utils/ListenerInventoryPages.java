@@ -58,9 +58,21 @@ public abstract class ListenerInventoryPages extends ListenerInventory {
 		ItemStack slotItem = event.getView().getItem(slot);
 		if (isEmpty(slotItem)) return;
 		if (slot == closeSlot) event.getView().close();
-		else if (slot == nextSlot) setPage(currentPage + 1);
-		else if (slot == previousSlot) setPage(currentPage - 1);
+		else if (slot == nextSlot) next(click);
+		else if (slot == previousSlot) previous(click);
 		else otherSlot(event,slot,slotItem);
+	}
+	
+	protected void next(ClickType click) {
+		changePage(1);
+	}
+	
+	protected void previous(ClickType click) {
+		changePage(-1);
+	}
+	
+	protected void changePage(int num) {
+		setPage(Math.min(Math.max(currentPage + num,1),maxPage()));
 	}
 	
 	protected void reset() {

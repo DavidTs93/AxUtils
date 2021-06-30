@@ -10,43 +10,32 @@ import me.Aldreda.AxUtils.Utils.PlaceholderManager;
 import me.Aldreda.AxUtils.Utils.Utils;
 import me.Aldreda.AxUtils.Utils.WorldGuardManager;
 import me.DMan16.AxEconomy.AxEconomy;
+import me.DMan16.AxUpdater.AxUpdater;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.SmithingRecipe;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.sql.SQLException;
+import java.sql.Connection;
 import java.util.Iterator;
 
 public class AxUtils extends JavaPlugin {
 	private static AxUtils instance = null;
 	public static final String pluginName = "Aldreda";
 	public static final String pluginNameColors = "&6&lAldreda";
-	private static MySQL SQL = null;
 	private static AxEconomy economy = null;
 	private static WorldGuardManager WorldGuardManager = null;
 	private static PlaceholderManager PAPIManager = null;
 	private static CitizensManager CitizensManager = null;
 	private static ProtocolManager ProtocolManager;
-
+	
 	public void onLoad() {
 		if (getServer().getPluginManager().getPlugin("WorldGuard") != null) WorldGuardManager = new WorldGuardManager();
 	}
 	
 	public void onEnable() {
-		saveDefaultConfig();
 		instance = this;
-		try {
-			SQL = new MySQL(getConfig().getString("mysql.host"),getConfig().getInt("mysql.port"),getConfig().getString("mysql.database"),
-					getConfig().getString("mysql.username"),getConfig().getString("mysql.password"));
-		} catch (SQLException e) {
-			this.getLogger().severe("MySQL error: ");
-			e.printStackTrace();
-			Bukkit.getPluginManager().disablePlugin(this);
-			Bukkit.shutdown();
-			return;
-		}
 		Utils.chatColorsLogPlugin("&aConnected to MySQL database");
 		firstOfAll();
 		Utils.chatColorsLogPlugin("&aLoaded, running on version: &f" + Utils.getVersion() + "&a, Java version: &f" + Utils.javaVersion());
@@ -92,8 +81,8 @@ public class AxUtils extends JavaPlugin {
 		return instance;
 	}
 	
-	public static final MySQL getMySQL() {
-		return SQL;
+	public static final Connection getConnection() {
+		return AxUpdater.getConnection();
 	}
 	
 	public static final void AxEconomyReady() {

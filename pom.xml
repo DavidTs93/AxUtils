@@ -21,7 +21,6 @@
 				<directory>${basedir}</directory>
 				<includes>
 					<include>plugin.yml</include>
-					<include>config.yml</include>
 				</includes>
 			</resource>
 		</resources>
@@ -32,7 +31,6 @@
 				<configuration>
 					<source>${java.version}</source>
 					<target>${java.version}</target>
-					<executable>C:\Program Files\Java\jdk-11.0.9\bin\javac.exe</executable>
 					<compilerArgs>
 						<arg>-Xlint:deprecation</arg>
 					</compilerArgs>
@@ -117,6 +115,12 @@
 			<groupId>com.comphenix.protocol</groupId>
 			<artifactId>ProtocolLib</artifactId>
 			<version>4.6.0</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>Aldreda</groupId>
+			<artifactId>AxUpdater</artifactId>
+			<version>1.0</version>
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>

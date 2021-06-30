@@ -3,9 +3,9 @@ import java.util.Objects;
 import java.util.function.Function;
 
 public class Trio<F,S,T> {
-	public final F first;
-	public final S second;
-	public final T third;
+	private final F first;
+	private final S second;
+	private final T third;
 	
 	protected Trio(F first, S second, T third) {
 		this.first = first;
@@ -13,15 +13,15 @@ public class Trio<F,S,T> {
 		this.third = third;
 	}
 	
-	public F getFirst() {
+	public F first() {
 		return this.first;
 	}
 	
-	public S getSecond() {
+	public S second() {
 		return this.second;
 	}
 	
-	public T getThird() {
+	public T third() {
 		return this.third;
 	}
 	

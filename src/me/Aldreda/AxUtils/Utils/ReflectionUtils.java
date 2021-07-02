@@ -13,24 +13,44 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @SuppressWarnings("deprecation")
 public class ReflectionUtils {
 	public static String version = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
-	//public static Object space = ReflectionUtils.buildIChatBaseComponent(" ",false);
+	
+	private static String removeUnnecessaryDots(String str) {
+		return Arrays.stream(str.split("\\.")).filter(s -> !s.isEmpty()).collect(Collectors.joining("."));
+	}
+	
+	public static Class<?> getClassNMS(String name, String subPackageNameNewNMS) {
+		Class clazz = null;
+		try {
+			clazz = Class.forName("net.minecraft." + (Utils.getVersionInt() >= 17 ? removeUnnecessaryDots(subPackageNameNewNMS) : "server." + version) + "." + removeUnnecessaryDots(name));
+		} catch (Exception e) {}
+		return clazz;
+	}
+	
+	public static Class<?> getClassCraftBukkit(String name) {
+		Class clazz = null;
+		try {
+			clazz = Class.forName("org.bukkit.craftbukkit." + version + "." + removeUnnecessaryDots(name));
+		} catch (Exception e) {}
+		return clazz;
+	}
 
 	/**
 	 * @param item Bukkit ItemStack
 	 * @return item's material's translatable name, example: Material.APPLE -> "item.minecraft.apple"
 	 */
-	public static String getItemTranslateableName(ItemStack item) {
+	public static String getItemTranslatableName(ItemStack item) {
 		String name = null;
 		try {
-			Class<?> craftItemClass = Class.forName("org.bukkit.craftbukkit." + version + ".inventory.CraftItemStack");
-			Class<?> nmsItemStackClass = Class.forName("net.minecraft.server." + version + ".ItemStack");
+			Class<?> craftItemClass = getClassCraftBukkit("inventory.CraftItemStack");
+			Class<?> nmsItemStackClass = getClassNMS("ItemStack","world.item");
 			Method methodNMSCopy = craftItemClass.getMethod("asNMSCopy",ItemStack.class);
 			Method methodGetItem = nmsItemStackClass.getMethod("getItem");
-			Class<?> nmsItemClass = Class.forName("net.minecraft.server." + version + ".Item");
+			Class<?> nmsItemClass = getClassNMS("Item","world.item");
 			Method methodGetName = nmsItemClass.getMethod("getName");
 			Object ItemStackNMS = methodNMSCopy.invoke(null,item);
 			Object ItemNMS = methodGetItem.invoke(ItemStackNMS);
@@ -45,7 +65,7 @@ public class ReflectionUtils {
 	 */
 	public static Object ItemAsNMSCopy(ItemStack item) {
 		try {
-			Class<?> craftItemClass = Class.forName("org.bukkit.craftbukkit." + version + ".inventory.CraftItemStack");
+			Class<?> craftItemClass = getClassCraftBukkit("inventory.CraftItemStack");
 			Method methodNMSCopy = craftItemClass.getMethod("asNMSCopy",ItemStack.class);
 			return methodNMSCopy.invoke(null,item);
 		} catch (Exception e) {}
@@ -58,8 +78,8 @@ public class ReflectionUtils {
 	 */
 	public static ItemStack ItemAsBukkitCopy(Object item) {
 		try {
-			Class<?> craftItemClass = Class.forName("org.bukkit.craftbukkit." + version + ".inventory.CraftItemStack");
-			Class<?> itemClass = Class.forName("net.minecraft.server." + version + ".ItemStack");
+			Class<?> craftItemClass = getClassCraftBukkit("inventory.CraftItemStack");
+			Class<?> itemClass = getClassNMS("ItemStack","world.item");
 			Method methodBukkitCopy = craftItemClass.getMethod("asBukkitCopy",itemClass);
 			return (ItemStack) methodBukkitCopy.invoke(null,item);
 		} catch (Exception e) {}
@@ -68,9 +88,9 @@ public class ReflectionUtils {
 	
 	public static ItemStack getTridentAsItemStack(Trident trident) {
 		try {
-			Class<?> craftClass = Class.forName("org.bukkit.craftbukkit." + version + ".inventory.CraftItemStack");
-			Class<?> itemClass = Class.forName("net.minecraft.server." + version + ".ItemStack");
-			Class<?> tridentClass = Class.forName("org.bukkit.craftbukkit." + version + ".entity.CraftTrident");
+			Class<?> craftClass = getClassCraftBukkit("inventory.CraftItemStack");
+			Class<?> itemClass = getClassNMS("ItemStack","world.item");
+			Class<?> tridentClass = getClassCraftBukkit("entity.CraftTrident");
 			Method methodBukkitCopy = craftClass.getMethod("asBukkitCopy",itemClass);
 			Method methodGetHandle = tridentClass.getDeclaredMethod("getHandle");
 			Object castTrident = tridentClass.cast(trident);
@@ -79,8 +99,7 @@ public class ReflectionUtils {
 			field.setAccessible(true);
 			Object tridentHandle = field.get(tridentEntity);
 			Object obj = methodBukkitCopy.invoke(tridentHandle.getClass(),tridentHandle);
-			ItemStack item = (ItemStack) obj;
-			return item;
+			return (ItemStack) obj;
 		} catch (Exception e) {}
 		return null;
 	}
@@ -90,11 +109,11 @@ public class ReflectionUtils {
 		boolean[] result = new boolean[effects.size()];
 		Arrays.fill(result,false);
 		try {
-			Class<?> classCraftPlayer = Class.forName("org.bukkit.craftbukkit." + version + ".entity.CraftPlayer");
+			Class<?> classCraftPlayer = getClassCraftBukkit("entity.CraftPlayer");
 			Method methodGetHandle = classCraftPlayer.getDeclaredMethod("getHandle");
-			Class<?> classEntityLiving = Class.forName("net.minecraft.server." + version + ".EntityLiving");
-			Class<?> classMobEffect = Class.forName("net.minecraft.server." + version + ".MobEffect");
-			Class<?> classMobEffectList = Class.forName("net.minecraft.server." + version + ".MobEffectList");
+			Class<?> classEntityLiving = getClassNMS("EntityLiving","world.entity");
+			Class<?> classMobEffect = getClassNMS("MobEffect","world.effect");
+			Class<?> classMobEffectList = getClassNMS("MobEffectList","world.effect");
 			Method methodFromId = classMobEffectList.getMethod("fromId",int.class);
 			Object EntityLivingPlayer = methodGetHandle.invoke(player);
 			Constructor<?> MobEffectConstructor = classMobEffect.getConstructor(classMobEffectList,int.class,int.class,
@@ -121,10 +140,10 @@ public class ReflectionUtils {
 		boolean[] result = new boolean[effects.size()];
 		Arrays.fill(result,false);
 		try {
-			Class<?> classCraftPlayer = Class.forName("org.bukkit.craftbukkit." + version + ".entity.CraftPlayer");
+			Class<?> classCraftPlayer = getClassCraftBukkit("entity.CraftPlayer");
 			Method methodGetHandle = classCraftPlayer.getDeclaredMethod("getHandle");
-			Class<?> classEntityLiving = Class.forName("net.minecraft.server." + version + ".EntityLiving");
-			Class<?> classMobEffectList = Class.forName("net.minecraft.server." + version + ".MobEffectList");
+			Class<?> classEntityLiving = getClassNMS("EntityLiving","world.entity");
+			Class<?> classMobEffectList = getClassNMS("MobEffectList","world.effect");
 			Method methodFromId = classMobEffectList.getMethod("fromId",int.class);
 			Object EntityLivingPlayer = methodGetHandle.invoke(player);
 			Method methodRemoveEffect = classEntityLiving.getMethod("removeEffect",classMobEffectList,cause.getClass());

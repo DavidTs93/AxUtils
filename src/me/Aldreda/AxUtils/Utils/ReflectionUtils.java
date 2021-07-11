@@ -26,7 +26,7 @@ public class ReflectionUtils {
 	public static Class<?> getClassNMS(String name, String subPackageNameNewNMS) {
 		Class clazz = null;
 		try {
-			clazz = Class.forName("net.minecraft." + (Utils.getVersionInt() >= 17 ? removeUnnecessaryDots(subPackageNameNewNMS) : "server." + version) + "." + removeUnnecessaryDots(name));
+			clazz = Class.forName(removeUnnecessaryDots("net.minecraft." + (Utils.getVersionInt() >= 17 ? subPackageNameNewNMS : "server." + version) + "." + name));
 		} catch (Exception e) {}
 		return clazz;
 	}
@@ -34,7 +34,7 @@ public class ReflectionUtils {
 	public static Class<?> getClassCraftBukkit(String name) {
 		Class clazz = null;
 		try {
-			clazz = Class.forName("org.bukkit.craftbukkit." + version + "." + removeUnnecessaryDots(name));
+			clazz = Class.forName(removeUnnecessaryDots("org.bukkit.craftbukkit." + version + "." + name));
 		} catch (Exception e) {}
 		return clazz;
 	}

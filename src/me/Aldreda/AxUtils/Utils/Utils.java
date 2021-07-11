@@ -1,9 +1,10 @@
 package me.Aldreda.AxUtils.Utils;
 
-import com.google.common.collect.Lists;
 import me.Aldreda.AxUtils.AxUtils;
 import me.Aldreda.AxUtils.Classes.Pair;
 import me.Aldreda.AxUtils.Listeners.CancelPlayers;
+import me.DMan16.AxEconomy.AxEconomyMain;
+import me.DMan16.AxUpdater.AxUpdater;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.md_5.bungee.api.ChatColor;
@@ -27,20 +28,25 @@ import org.yaml.snakeyaml.external.biz.base64Coder.Base64Coder;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
+import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Utils {
 	private static final Pattern pattern = Pattern.compile("&#[a-fA-F0-9]{6}");
 	private static final Pattern unicode = Pattern.compile("\\\\u\\+[a-fA-F0-9]{4}");
 	private static final Set<Long> sessionIDs = new HashSet<Long>();
 	private static List<Material> interactable = null;
+	private static List<Material> alwaysInteractable = null;
+	
+	static {
+		createInteractable();
+	}
 	
 	public static String javaVersion() {
 		String javaVersion = "";
@@ -249,10 +255,7 @@ public class Utils {
 	 */
 	public static boolean sameItem(ItemStack item1, ItemStack item2) {
 		if (item1 == null || item2 == null) return item1 == item2;
-		if (item1 == item2 || item1.equals(item2)) return true;
-		ItemStack cmp1 = item1.asQuantity(1);
-		ItemStack cmp2 = item2.asQuantity(1);
-		return cmp1 == cmp2 || cmp1.equals(cmp2);
+		return item1.isSimilar(item2);
 	}
 	
 	/**
@@ -260,17 +263,16 @@ public class Utils {
 	 */
 	public static boolean similarItem(ItemStack item1, ItemStack item2) {
 		if (item1 == null || item2 == null) return item1 == item2;
-		if (item1 == item2 || item1.equals(item2)) return true;
-		ItemStack cmp1 = item1.asQuantity(1);
-		ItemStack cmp2 = item2.asQuantity(1);
-		if (cmp1 == cmp2 || cmp1.equals(cmp2)) return true;
+		if (item1.isSimilar(item2)) return true;
+		ItemStack cmp1 = item1.clone();
+		ItemStack cmp2 = item2.clone();
 		ItemMeta meta1 = cmp1.getItemMeta();
 		ItemMeta meta2 = cmp2.getItemMeta();
 		meta1.displayName(null);
 		meta2.displayName(null);
 		cmp1.setItemMeta(meta1);
 		cmp2.setItemMeta(meta2);
-		return cmp1 == cmp2 || cmp1.equals(cmp2);
+		return cmp1.isSimilar(cmp2);
 	}
 	
 	/**
@@ -589,16 +591,18 @@ public class Utils {
 	}
 	
 	public static boolean isInteract(Material material, Player player) {
-		if (isInteractable(material)) return !player.isSneaking();
+		if (isInteractable(material)) return alwaysInteractable.contains(material) || !player.isSneaking();
 		return false;
 	}
 	
 	private static void createInteractable() {
 		interactable = new ArrayList<Material>();
-		String[] initialInteractable = {"MINECART","CHEST_MINECART","FURNACE_MINECART","HOPPER_MINECART","CHEST","ENDER_CHEST","TRAPPED_CHEST",
+		alwaysInteractable = new ArrayList<Material>();
+		addMaterials(alwaysInteractable,Arrays.asList("ARMOR_STAND","ITEM_FRAME","GLOW_ITEM_FRAME").stream().map(Material::getMaterial).collect(Collectors.toList()));
+		List<Material> initialInteractable = Stream.of("MINECART","CHEST_MINECART","FURNACE_MINECART","HOPPER_MINECART","CHEST","ENDER_CHEST","TRAPPED_CHEST",
 				"NOTE_BLOCK","CRAFTING_TABLE","FURNACE","BLAST_FURNACE","LEVER","ENCHANTING_TABLE","BEACON","DAYLIGHT_DETECTOR","HOPPER","DROPPER","REPEATER",
-				"COMPARATOR","COMPOSTER","CAKE","BREWING_STAND","LOOM","BARREL","SMOKER","CARTOGRAPHY_TABLE","SMITHING_TABLE","GRINDSTONE",
-				"LECTERN","STONECUTTER","DISPENSER","BELL","ITEM_FRAME","FLOWER_POT"};
+				"COMPARATOR","COMPOSTER","CAKE","ARMOR_STAND","BREWING_STAND","LOOM","BARREL","SMOKER","CARTOGRAPHY_TABLE","SMITHING_TABLE","GRINDSTONE",
+				"LECTERN","STONECUTTER","DISPENSER","BELL","ITEM_FRAME","FLOWER_POT","GLOW_ITEM_FRAME").map(Material::getMaterial).collect(Collectors.toList());
 		addInteractable(initialInteractable);
 		addInteractable(Tag.ANVIL.getValues());
 		addInteractable(Tag.BUTTONS.getValues());
@@ -610,18 +614,15 @@ public class Utils {
 	}
 	
 	public static void addInteractable(Material ... materials) {
-		if (materials == null || materials.length == 0) return;
-		for (Material material : materials) if (material != null) interactable.add(material);
-	}
-	
-	public static void addInteractable(String ... materials) {
-		if (materials == null || materials.length == 0) return;
-		for (String material : materials) if (material != null) addInteractable(Material.getMaterial(material));
+		addInteractable(Arrays.asList(materials));
 	}
 	
 	public static void addInteractable(Collection<Material> materials) {
-		if (materials == null || materials.isEmpty()) return;
-		for (Material material : materials) if (material != null) addInteractable(material);
+		addMaterials(interactable,materials);
+	}
+	
+	private static void addMaterials(List<Material> list, Collection<Material> materials) {
+		if (list != null && materials != null && !materials.isEmpty()) materials.stream().filter(Objects::nonNull).forEach(m -> list.add(m));
 	}
 	
 	public static <V> List<V> joinLists(List<? extends V> ... lists) {
@@ -680,6 +681,14 @@ public class Utils {
 	public static void savePlayer(@NotNull Player player) {
 		if (player == null || isPlayerNPC(player)) return;
 		player.saveData();
-//		if (Bukkit.getPluginManager().getPlugin("AxInventories") != null) me.DMan16.AxInventories.AxInventories.save();
+		if (Bukkit.getPluginManager().getPlugin("AxInventories") != null) me.DMan16.AxInventories.AxInventories.save(player);
+	}
+	
+	public static UUID getPlayerUUIDByName(String name) {
+		return AxUpdater.getPlayerUUIDByName(name);
+	}
+	
+	public static String getPlayerNameByUUID(UUID ID) {
+		return AxUpdater.getPlayerNameByUUID(ID);
 	}
 }
